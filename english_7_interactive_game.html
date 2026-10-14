@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiếng Anh 7: Vocabulary Matching Game - Health & Outdoor Activities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Snowflake Animation */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall linear infinite;
+            z-index: 1;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px) translateX(0);
+            }
+            100% {
+                transform: translateY(105vh) translateX(25px);
+            }
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(30, 81, 40, 0.15), 0 8px 10px -6px rgba(30, 81, 40, 0.08);
+        }
+
+        /* Pulse badge effect */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 2s infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between text-gray-800 relative selection:bg-emerald-200">
+
+    <!-- Snow Effect Container -->
+    <div id="snow-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- Header Navigation -->
+    <header class="w-full bg-emerald-800 text-white py-4 px-6 shadow-lg z-10 flex flex-wrap justify-between items-center sticky top-0 backdrop-blur-md bg-opacity-95">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">🥦</span>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">English 7: Healthy Living</h1>
+                <p class="text-xs text-emerald-200 hidden sm:block">Từ vựng & Bài tập tương tác Unit 2</p>
+            </div>
+        </div>
+
+        <!-- Mode Switches & Score Board -->
+        <div class="flex items-center space-x-3 mt-2 sm:mt-0">
+            <div id="mode-badge" class="bg-emerald-900/80 border border-emerald-600 px-3 py-1 rounded-full text-xs font-semibold text-emerald-200">
+                Chế độ: Nối Từ & Hình
+            </div>
+            <div class="bg-amber-400 text-emerald-950 font-bold px-4 py-1.5 rounded-full text-sm shadow-md flex items-center space-x-1">
+                <span>⭐ Điểm:</span>
+                <span id="score-display" class="text-lg">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="w-full max-w-4xl mx-auto px-4 mt-6 z-10 flex justify-center space-x-2 sm:space-x-4">
+        <button id="tab-matching" onclick="switchMode('matching')" class="px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-emerald-600 text-white border-2 border-emerald-500">
+            🧩 Chế độ 1: Nối Từ & Hình (Matching)
+        </button>
+        <button id="tab-quiz" onclick="switchMode('quiz')" class="px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-white text-emerald-800 border-2 border-emerald-200 hover:bg-emerald-50">
+            📝 Chế độ 2: Trắc Nghiệm Nói & Đọc (Quiz)
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4 my-2 z-10">
+        <div id="main-card" class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-3xl card-shadow p-5 sm:p-8 transition-all duration-300">
+
+            <!-- MODE 1: MATCHING GAME -->
+            <div id="matching-game-view" class="block">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-emerald-800">Nối Từ vựng với Hình minh họa</h2>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">
+                        👉 Click chọn 1 <strong>Từ vựng ở cột Trái</strong>, sau đó chọn <strong>Hình ảnh ở cột Phải</strong> tương ứng!
+                    </p>
+                </div>
+
+                <!-- Game Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column: English Words -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-emerald-700 uppercase tracking-wider text-xs bg-emerald-100 py-1.5 px-3 rounded-lg w-max mb-2">
+                            📌 Cột Từ vựng (Vocabulary)
+                        </h3>
+                        <div id="words-list" class="space-y-3">
+                            <!-- Dynamically generated word cards -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Visual Images/Illustrations -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-emerald-700 uppercase tracking-wider text-xs bg-emerald-100 py-1.5 px-3 rounded-lg w-max mb-2">
+                            🖼️ Cột Hình minh họa (Pictures)
+                        </h3>
+                        <div id="images-list" class="space-y-3">
+                            <!-- Dynamically generated image cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Status / Notification Box -->
+                <div id="matching-feedback" class="mt-6 p-4 rounded-2xl text-center font-bold text-sm hidden transition-all"></div>
+
+                <!-- Reset Button -->
+                <div class="mt-6 flex justify-center">
+                    <button onclick="resetMatchingGame()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-6 py-2.5 rounded-full text-sm transition shadow-sm flex items-center space-x-2 cursor-pointer">
+                        <span>🔄 Chơi lại nối từ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODE 2: MULTIPLE CHOICE QUIZ -->
+            <div id="quiz-game-view" class="hidden">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-md">
+                        Câu hỏi <span id="quiz-q-num">1</span>/5
+                    </span>
+                    <span id="quiz-progress-percent" class="text-xs font-bold text-emerald-600">0% Hoàn thành</span>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Quiz Card Content -->
+                <div id="quiz-card-content">
+                    <div class="flex flex-col md:flex-row items-center gap-4 mb-6 bg-emerald-50/70 p-5 rounded-2xl border border-emerald-100">
+                        <div id="quiz-image-box" class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-white rounded-2xl p-2 shadow-sm border border-emerald-100 flex items-center justify-center">
+                            <!-- SVG image -->
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-emerald-600 uppercase">Câu hỏi nghĩa từ vựng</span>
+                            <h3 id="quiz-question-title" class="text-xl sm:text-2xl font-extrabold text-gray-800 mt-0.5">
+                                Loading...
+                            </h3>
+                            <p id="quiz-question-sub" class="text-xs sm:text-sm text-gray-500 mt-1">
+                                Chọn đáp án tiếng Việt hoặc cụm từ tiếng Anh chính xác nhất.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Options list -->
+                    <div id="quiz-options" class="space-y-3 mb-6">
+                        <!-- Options generated dynamically -->
+                    </div>
+
+                    <!-- Quiz Feedback Box -->
+                    <div id="quiz-feedback-box" class="hidden p-4 rounded-2xl mb-6 text-sm font-medium border"></div>
+
+                    <div class="flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow transition transform active:scale-95 cursor-pointer">
+                            Câu tiếp theo ➡️
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Completion View -->
+                <div id="quiz-result-view" class="hidden text-center py-8">
+                    <div class="text-6xl mb-3 animate-pulse-slow">🎉</div>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-800 mb-2">Hoàn thành xuất sắc!</h3>
+                    <p class="text-gray-600 mb-6">Bạn đã nắm vững các từ vựng chủ đề Sức Khỏe - Lớp 7!</p>
+
+                    <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl max-w-sm mx-auto mb-6 shadow-inner">
+                        <p class="text-gray-600 font-medium text-sm">Điểm số Trắc nghiệm:</p>
+                        <p class="text-4xl font-black text-emerald-600 my-1"><span id="quiz-final-score">0</span> / 5</p>
+                        <p id="quiz-final-comment" class="text-xs font-semibold text-emerald-800 mt-2"></p>
+                    </div>
+
+                    <button onclick="restartQuiz()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-full shadow-lg transition transform active:scale-95 cursor-pointer">
+                        Làm lại Trắc nghiệm 🔄
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-xs text-emerald-900 bg-emerald-100/60 font-medium z-10 border-t border-emerald-200">
+        Game Tương Tác Tiếng Anh 7 • Bộ sách Global Success (Unit 2: Healthy Living) ❄️🌱
+    </footer>
+
+    <!-- Game Logic Scripts -->
+    <script>
+        // Matching Item Data (Based strictly on the book screenshot)
+        const itemsData = [
+            {
+                id: 1,
+                word: "1. dim light",
+                vietnamese: "ánh sáng yếu / mờ",
+                letter: "c",
+                desc: "Picture c: Đèn điện phát ra ánh sáng yếu, mờ",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect width="100" height="100" rx="16" fill="#2d3748"/>
+                        <!-- Light bulb hanging -->
+                        <line x1="50" y1="0" x2="50" y2="35" stroke="#a0aec0" stroke-width="3"/>
+                        <path d="M 35 45 C 35 30, 65 30, 65 45 C 65 55, 58 60, 58 70 L 42 70 C 42 60, 35 55, 35 45 Z" fill="#4a5568" stroke="#cbd5e0" stroke-width="2"/>
+                        <rect x="42" y="70" width="16" height="8" rx="2" fill="#a0aec0"/>
+                        <!-- Dim Filament glow -->
+                        <circle cx="50" cy="50" r="8" fill="#f6ad55" opacity="0.8"/>
+                        <path d="M 46 52 L 50 42 L 54 52" stroke="#dd6b20" stroke-width="2" fill="none"/>
+                        <!-- Soft dim light rays -->
+                        <circle cx="50" cy="50" r="22" fill="#feebc8" opacity="0.15"/>
+                      </svg>`
+            },
+            {
+                id: 2,
+                word: "2. lip balm",
+                vietnamese: "son dưỡng môi",
+                letter: "e",
+                desc: "Picture e: Thỏi son dưỡng môi chống khô nẻ",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect width="100" height="100" rx="16" fill="#f3e8ff"/>
+                        <!-- Lip balm tube base -->
+                        <rect x="35" y="50" width="30" height="40" rx="6" fill="#c084fc"/>
+                        <rect x="35" y="45" width="30" height="8" fill="#e9d5ff"/>
+                        <!-- Balm stick inner -->
+                        <path d="M 40 45 L 40 22 C 40 18, 60 18, 60 22 L 60 45 Z" fill="#ffffff" stroke="#f3e8ff" stroke-width="1"/>
+                        <ellipse cx="50" cy="22" rx="10" ry="4" fill="#fbcfe8"/>
+                        <!-- Sparkle -->
+                        <path d="M 25 25 L 28 30 L 33 33 L 28 36 L 25 41 L 22 36 L 17 33 L 22 30 Z" fill="#f472b6"/>
+                      </svg>`
+            },
+            {
+                id: 3,
+                word: "3. chapped lips",
+                vietnamese: "môi bị nứt nẻ",
+                letter: "d",
+                desc: "Picture d: Đôi môi bị khô bong tróc, nứt nẻ",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect width="100" height="100" rx="16" fill="#fff1f2"/>
+                        <!-- Face/Lips artwork -->
+                        <path d="M 15 45 C 35 30, 65 30, 85 45 C 65 52, 35 52, 15 45 Z" fill="#fda4af"/>
+                        <path d="M 15 45 C 35 68, 65 68, 85 45 C 65 58, 35 58, 15 45 Z" fill="#f43f5e"/>
+                        <!-- Chapped cracks -->
+                        <path d="M 38 42 L 42 50 M 50 38 L 48 52 M 60 43 L 58 51 M 44 55 L 46 62 M 54 54 L 52 63" stroke="#9f1239" stroke-width="2" stroke-linecap="round"/>
+                      </svg>`
+            },
+            {
+                id: 4,
+                word: "4. coloured vegetables",
+                vietnamese: "rau củ nhiều màu sắc",
+                letter: "a",
+                desc: "Picture a: Đĩa ớt chuông, bông cải xanh nhiều màu",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect width="100" height="100" rx="16" fill="#f0fdf4"/>
+                        <!-- Broccoli -->
+                        <circle cx="35" cy="40" r="16" fill="#22c55e"/>
+                        <circle cx="28" cy="48" r="12" fill="#16a34a"/>
+                        <circle cx="42" cy="48" r="12" fill="#15803d"/>
+                        <rect x="32" y="55" width="8" height="18" fill="#86efac" rx="2"/>
+                        <!-- Red pepper -->
+                        <path d="M 52 50 C 50 35, 75 35, 75 50 C 75 70, 52 70, 52 50 Z" fill="#ef4444"/>
+                        <path d="M 62 38 C 60 30, 68 25, 66 22" stroke="#15803d" stroke-width="3" fill="none"/>
+                        <!-- Yellow pepper -->
+                        <path d="M 65 60 C 60 48, 85 48, 85 60 C 85 75, 65 75, 65 60 Z" fill="#eab308"/>
+                      </svg>`
+            },
+            {
+                id: 5,
+                word: "5. red spots",
+                vietnamese: "mụn đỏ / vết đỏ trên da",
+                letter: "b",
+                desc: "Picture b: Làn da mặt có các nốt mụn sưng đỏ",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect width="100" height="100" rx="16" fill="#fff7ed"/>
+                        <!-- Cheek outline -->
+                        <path d="M 20 20 C 60 10, 85 40, 80 85 C 50 85, 20 60, 20 20 Z" fill="#fed7aa"/>
+                        <!-- Red spots / pimples -->
+                        <circle cx="45" cy="40" r="5" fill="#ef4444"/>
+                        <circle cx="45" cy="40" r="2" fill="#fca5a5"/>
+                        <circle cx="60" cy="52" r="6" fill="#dc2626"/>
+                        <circle cx="60" cy="52" r="2.5" fill="#fecaca"/>
+                        <circle cx="38" cy="62" r="4" fill="#ef4444"/>
+                        <circle cx="68" cy="38" r="4.5" fill="#f87171"/>
+                      </svg>`
+            }
+        ];
+
+        // Quiz Question Data (Question 5 fixed to 'red spots')
+        const quizQuestions = [
+            {
+                itemId: 1,
+                title: "'dim light' có nghĩa là gì?",
+                options: ["Ánh sáng mặt trời rực rỡ", "Ánh sáng yếu / mờ", "Đèn giao thông", "Đèn pin siêu sáng"],
+                correct: 1,
+                explain: "Dim light có nghĩa là ánh sáng mờ, yếu. Nhìn vào sách trong ánh sáng mờ có thể làm hại mắt."
+            },
+            {
+                itemId: 2,
+                title: "Thỏi son dưỡng môi trong tiếng Anh gọi là:",
+                options: ["lip balm", "red spots", "chapped lips", "suncream"],
+                correct: 0,
+                explain: "Lip balm chính là thỏi son dưỡng môi giúp giữ ẩm môi không bị khô nẻ."
+            },
+            {
+                itemId: 3,
+                title: "Hiện tượng 'chapped lips' mô tả tình trạng nào?",
+                options: ["Môi bị sưng tấy", "Môi có màu đỏ", "Môi bị khô, nứt nẻ", "Môi bị mụn trứng cá"],
+                correct: 2,
+                explain: "Chapped lips nghĩa là môi bị nứt nẻ do thời tiết khô lạnh."
+            },
+            {
+                itemId: 4,
+                title: "Nên ăn nhiều 'coloured vegetables' nghĩa là ăn:",
+                options: ["Rau củ héo", "Rau củ nhiều màu sắc (ớt chuông, củ dền, bông cải)", "Cơm và mì gói", "Các loại nước ngọt"],
+                correct: 1,
+                explain: "Coloured vegetables là các loại rau củ quả màu sắc sặc sỡ, cung cấp rất nhiều vitamin A, C tốt cho sức khỏe."
+            },
+            {
+                itemId: 5,
+                title: "Các vết nốt mụn đỏ trên da trong tiếng Anh gọi là gì?",
+                options: ["dim light", "lip balm", "red spots", "coloured vegetables"],
+                correct: 2, // 'red spots' is index 2
+                explain: "Red spots là các nốt đỏ hoặc mụn đỏ xuất hiện trên da mặt/cơ thể."
+            }
+        ];
+
+        // State variables
+        let selectedWordId = null;
+        let selectedImageLetter = null;
+        let matchedPairs = [];
+        let score = 0;
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizAnswered = false;
+
+        // Audio Context initialization
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.setValueAtTime(160, now + 0.15);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'match-click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        // Snow animation
+        function initSnow() {
+            const container = document.getElementById('snow-container');
+            const totalSnowflakes = 25;
+            for (let i = 0; i < totalSnowflakes; i++) {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                const size = Math.random() * 6 + 4 + 'px';
+                flake.style.width = size;
+                flake.style.height = size;
+                flake.style.left = Math.random() * 100 + 'vw';
+                flake.style.opacity = Math.random() * 0.7 + 0.3;
+                flake.style.animationDuration = Math.random() * 6 + 5 + 's';
+                flake.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(flake);
+            }
+        }
+
+        // Switch Game Mode
+        function switchMode(mode) {
+            initAudio();
+            const matchingView = document.getElementById('matching-game-view');
+            const quizView = document.getElementById('quiz-game-view');
+            const tabMatching = document.getElementById('tab-matching');
+            const tabQuiz = document.getElementById('tab-quiz');
+            const modeBadge = document.getElementById('mode-badge');
+
+            if (mode === 'matching') {
+                matchingView.classList.remove('hidden');
+                quizView.classList.add('hidden');
+
+                tabMatching.className = "px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-emerald-600 text-white border-2 border-emerald-500";
+                tabQuiz.className = "px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-white text-emerald-800 border-2 border-emerald-200 hover:bg-emerald-50";
+                modeBadge.innerText = "Chế độ: Nối Từ & Hình";
+            } else {
+                matchingView.classList.add('hidden');
+                quizView.classList.remove('hidden');
+
+                tabQuiz.className = "px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-emerald-600 text-white border-2 border-emerald-500";
+                tabMatching.className = "px-5 py-2.5 rounded-2xl font-bold text-sm sm:text-base shadow-md transition transform active:scale-95 cursor-pointer bg-white text-emerald-800 border-2 border-emerald-200 hover:bg-emerald-50";
+                modeBadge.innerText = "Chế độ: Trắc Nghiệm Từ Vựng";
+                
+                if (currentQuizIndex === 0 && !quizAnswered) {
+                    loadQuizQuestion();
+                }
+            }
+        }
+
+        // Render Matching Game Cards
+        function renderMatchingGame() {
+            const wordsList = document.getElementById('words-list');
+            const imagesList = document.getElementById('images-list');
+
+            wordsList.innerHTML = '';
+            imagesList.innerHTML = '';
+
+            // Render Words (Fixed order 1 to 5)
+            itemsData.forEach(item => {
+                const isMatched = matchedPairs.includes(item.id);
+                const isSelected = selectedWordId === item.id;
+
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                    isMatched 
+                        ? 'bg-green-100/80 border-green-400 text-green-900 opacity-80 cursor-not-allowed' 
+                        : isSelected 
+                            ? 'bg-emerald-100 border-emerald-600 shadow-md ring-2 ring-emerald-500 scale-[1.02]' 
+                            : 'bg-white border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50/50 shadow-sm'
+                }`;
+
+                div.innerHTML = `
+                    <div>
+                        <span class="font-extrabold text-emerald-900 text-base sm:text-lg block">${item.word}</span>
+                        <span class="text-xs text-gray-500 font-medium">${item.vietnamese}</span>
+                    </div>
+                    ${isMatched ? '<span class="text-xl">✅</span>' : '<span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded">Chọn</span>'}
+                `;
+
+                if (!isMatched) {
+                    div.onclick = () => selectWord(item.id);
+                }
+                wordsList.appendChild(div);
+            });
+
+            // Images column ordered alphabetically (a, b, c, d, e)
+            const sortedImages = [...itemsData].sort((a, b) => a.letter.localeCompare(b.letter));
+
+            sortedImages.forEach(item => {
+                const isMatched = matchedPairs.includes(item.id);
+                const isSelected = selectedImageLetter === item.letter;
+
+                const div = document.createElement('div');
+                div.className = `p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center space-x-3 ${
+                    isMatched 
+                        ? 'bg-green-100/80 border-green-400 opacity-80 cursor-not-allowed' 
+                        : isSelected 
+                            ? 'bg-emerald-100 border-emerald-600 shadow-md ring-2 ring-emerald-500 scale-[1.02]' 
+                            : 'bg-white border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50/50 shadow-sm'
+                }`;
+
+                div.innerHTML = `
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-50 rounded-xl p-1 border border-gray-100">
+                        ${item.svg}
+                    </div>
+                    <div class="flex-grow">
+                        <span class="font-bold text-emerald-800 text-sm block">Hình ${item.letter.toUpperCase()}</span>
+                        <span class="text-xs text-gray-500 line-clamp-2">${item.desc}</span>
+                    </div>
+                    ${isMatched ? '<span class="text-xl">✅</span>' : ''}
+                `;
+
+                if (!isMatched) {
+                    div.onclick = () => selectImage(item.letter);
+                }
+                imagesList.appendChild(div);
+            });
+        }
+
+        function selectWord(id) {
+            playSound('match-click');
+            selectedWordId = id;
+            checkMatch();
+            renderMatchingGame();
+        }
+
+        function selectImage(letter) {
+            playSound('match-click');
+            selectedImageLetter = letter;
+            checkMatch();
+            renderMatchingGame();
+        }
+
+        function checkMatch() {
+            if (selectedWordId && selectedImageLetter) {
+                const targetItem = itemsData.find(i => i.id === selectedWordId);
+                const feedback = document.getElementById('matching-feedback');
+
+                if (targetItem.letter === selectedImageLetter) {
+                    // Correct Match
+                    matchedPairs.push(selectedWordId);
+                    score += 10;
+                    playSound('correct');
+
+                    feedback.className = "mt-6 p-4 rounded-2xl text-center font-bold text-sm bg-green-100 border border-green-300 text-green-900 block";
+                    feedback.innerHTML = `🎉 Ghép chính xác! <strong>${targetItem.word}</strong> tương ứng với <strong>Hình ${targetItem.letter.toUpperCase()}</strong> (${targetItem.vietnamese}).`;
+
+                    selectedWordId = null;
+                    selectedImageLetter = null;
+                } else {
+                    // Incorrect Match
+                    playSound('incorrect');
+                    feedback.className = "mt-6 p-4 rounded-2xl text-center font-bold text-sm bg-red-100 border border-red-300 text-red-900 block";
+                    feedback.innerHTML = `❌ Chưa chính xác! Vui lòng thử chọn hình khác cho từ vựng này.`;
+
+                    selectedImageLetter = null;
+                }
+
+                updateScoreDisplay();
+
+                if (matchedPairs.length === itemsData.length) {
+                    setTimeout(() => {
+                        feedback.className = "mt-6 p-5 rounded-2xl text-center font-bold text-base bg-emerald-600 text-white shadow-lg block animate-bounce";
+                        feedback.innerHTML = `🏆 Xuất sắc! Bạn đã hoàn thành ghép đúng tất cả 5 từ vựng của Unit 2! Tặng bạn +50 điểm thưởng!`;
+                        score += 50;
+                        updateScoreDisplay();
+                    }, 500);
+                }
+            }
+        }
+
+        function resetMatchingGame() {
+            selectedWordId = null;
+            selectedImageLetter = null;
+            matchedPairs = [];
+            document.getElementById('matching-feedback').classList.add('hidden');
+            renderMatchingGame();
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('score-display').innerText = score;
+        }
+
+        // QUIZ GAME FUNCTIONS
+        function loadQuizQuestion() {
+            quizAnswered = false;
+            const q = quizQuestions[currentQuizIndex];
+            const targetItem = itemsData.find(i => i.id === q.itemId);
+
+            document.getElementById('quiz-q-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-question-title').innerText = q.title;
+            document.getElementById('quiz-image-box').innerHTML = targetItem.svg;
+
+            const percent = Math.round((currentQuizIndex / quizQuestions.length) * 100);
+            document.getElementById('quiz-progress-percent').innerText = `${percent}% Hoàn thành`;
+            document.getElementById('quiz-progress-bar').style.width = `${percent}%`;
+
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-emerald-100 hover:border-emerald-400 bg-emerald-50/30 hover:bg-emerald-50 font-semibold text-gray-800 transition flex items-center justify-between cursor-pointer";
+                btn.innerHTML = `
+                    <span><strong class="text-emerald-700 mr-2">${String.fromCharCode(65 + idx)}.</strong> ${opt}</span>
+                `;
+                btn.onclick = () => selectQuizOption(idx, btn);
+                optionsBox.appendChild(btn);
+            });
+
+            document.getElementById('quiz-feedback-box').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+        }
+
+        function selectQuizOption(index, btnEl) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+
+            const q = quizQuestions[currentQuizIndex];
+            const options = document.getElementById('quiz-options').children;
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+
+            if (index === q.correct) {
+                btnEl.className = "w-full text-left p-4 rounded-2xl border-2 border-green-500 bg-green-100 text-green-950 font-bold flex items-center justify-between";
+                quizScore++;
+                score += 20;
+                playSound('correct');
+                feedbackBox.className = "p-4 rounded-2xl mb-6 text-sm font-medium border bg-green-50 border-green-200 text-green-900 block";
+                feedbackBox.innerHTML = `✅ <strong>Chính xác!</strong> ${q.explain}`;
+            } else {
+                btnEl.className = "w-full text-left p-4 rounded-2xl border-2 border-red-400 bg-red-100 text-red-950 font-bold flex items-center justify-between";
+                options[q.correct].className = "w-full text-left p-4 rounded-2xl border-2 border-green-500 bg-green-100 text-green-950 font-bold flex items-center justify-between";
+                playSound('incorrect');
+                feedbackBox.className = "p-4 rounded-2xl mb-6 text-sm font-medium border bg-red-50 border-red-200 text-red-900 block";
+                feedbackBox.innerHTML = `❌ <strong>Chưa đúng!</strong> ${q.explain}`;
+            }
+
+            updateScoreDisplay();
+            feedbackBox.classList.remove('hidden');
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) {
+                loadQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-card-content').classList.add('hidden');
+            document.getElementById('quiz-result-view').classList.remove('hidden');
+            document.getElementById('quiz-final-score').innerText = quizScore;
+
+            document.getElementById('quiz-progress-percent').innerText = `100% Hoàn thành`;
+            document.getElementById('quiz-progress-bar').style.width = `100%`;
+
+            const comment = document.getElementById('quiz-final-comment');
+            if (quizScore === 5) {
+                comment.innerText = "🌟 Tuyệt đối 5/5! Bạn là cao thủ từ vựng Unit 2!";
+            } else if (quizScore >= 3) {
+                comment.innerText = "👍 Kết quả rất tốt! Hãy xem lại các câu chưa chính xác nhé.";
+            } else {
+                comment.innerText = "💡 Hãy thử lại để ghi nhớ chắc hơn các từ vựng này nhé!";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-result-view').classList.add('hidden');
+            document.getElementById('quiz-card-content').classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initSnow();
+            renderMatchingGame();
+        };
+    </script>
+</body>
+</html>
